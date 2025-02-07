@@ -33,3 +33,11 @@ To use LazyCopilot, run the following command in your terminal:
 ```sh
 bin/lazycopilot --path /path/to/your/git/repository
 ```
+
+## Screenshots
+
+Here are some screenshots demonstrating LazyCopilot in action:
+
+### Commit Message Generation
+
+![Commit Message Generation](screenshots/commit-message-generation.png)
