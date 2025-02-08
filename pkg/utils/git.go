@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func GetDiff(path string) string {
+func GetDiff(path string, staged bool) string {
 	if path == "" {
 		path = "$(pwd)"
 	}
@@ -14,10 +14,11 @@ func GetDiff(path string) string {
 		"-C",
 		path,
 		"diff",
-		"--staged",
-		"--no-color",
-		"--no-ext-diff",
 	}
+	if staged {
+		args = append(args, "--staged")
+	}
+	args = append(args, "--no-color", "--no-ext-diff")
 
 	cmd := exec.Command(args[0], args[1:]...)
 	out, err := cmd.Output()
@@ -26,4 +27,21 @@ func GetDiff(path string) string {
 	}
 
 	return strings.TrimSpace(string(out))
+}
+
+func StageChanges(path string) error {
+	if path == "" {
+		path = "$(pwd)"
+	}
+	args := []string{
+		"git",
+		"-C",
+		path,
+		"add",
+		".",
+	}
+
+	cmd := exec.Command(args[0], args[1:]...)
+	err := cmd.Run()
+	return err
 }
