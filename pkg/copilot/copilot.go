@@ -13,6 +13,22 @@ import (
 	"github.com/mr687/lazycopilot/pkg/utils"
 )
 
+const (
+	apiURL               = "https://api.githubcopilot.com"
+	authorizationHeader  = "Authorization"
+	acceptHeader         = "Accept"
+	contentTypeHeader    = "Content-Type"
+	applicationJSON      = "application/json"
+	copilotIntegrationID = "vscode-chat"
+	openaiOrganization   = "github-copilot"
+	openaiIntent         = "conversation-panel"
+	defaultModel         = "gpt-4o"
+	defaultTemperature   = 0.1
+	defaultSystemRole    = "system"
+	userRole             = "user"
+	assistantRole        = "assistant"
+)
+
 type GithubEndpoint struct {
 	API           string `json:"api"`
 	OriginTracker string `json:"origin-tracker"`
@@ -179,9 +195,9 @@ type copilot struct {
 
 func (c *copilot) generateAskRequest(histories []PromptMessage, prompt, systemPrompt, model string, temperature float64, maxOutputToken int, stream bool) interface{} {
 	isO1 := strings.HasPrefix(model, "o1")
-	systemRole := "system"
+	systemRole := defaultSystemRole
 	if isO1 {
-		systemRole = "user"
+		systemRole = userRole
 	}
 	messages := make([]PromptMessage, 0)
 	if systemPrompt != "" {
@@ -198,7 +214,7 @@ func (c *copilot) generateAskRequest(histories []PromptMessage, prompt, systemPr
 	if prompt != "" {
 		messages = append(messages, PromptMessage{
 			Content: prompt,
-			Role:    "user",
+			Role:    userRole,
 		})
 	}
 
@@ -226,17 +242,17 @@ func (c *copilot) Ask(ctx context.Context, prompt string, opts any) (string, err
 	prompt = strings.TrimSpace(prompt)
 
 	systemPrompt := strings.TrimSpace(COPILOT_INSTRUCTIONS)
-	temperature := 0.1
+	temperature := defaultTemperature
 
-	model := "gpt-4o"
+	model := defaultModel
 	models, err := c.FetchModels(ctx)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch models: %v. Please check your network connection and try again.", err)
+		return "", fmt.Errorf("failed to fetch models: %w", err)
 	}
 
 	modelConfig, ok := models[model]
 	if !ok {
-		return "", fmt.Errorf("model %s not found. Please ensure the model ID is correct and try again.", model)
+		return "", fmt.Errorf("model %s not found", model)
 	}
 
 	capabilities := modelConfig.Capabilities
@@ -278,26 +294,26 @@ func (c *copilot) Ask(ctx context.Context, prompt string, opts any) (string, err
 
 	headers, err := c.generateHeaders(ctx)
 	if err != nil {
-		return "", fmt.Errorf("failed to generate headers: %v. Please try again.", err)
+		return "", fmt.Errorf("failed to generate headers: %w", err)
 	}
 
 	res, err := utils.HttpRequest(ctx, utils.HttpOptions{
 		Method:  http.MethodPost,
-		Url:     "https://api.githubcopilot.com/chat/completions",
+		Url:     apiURL + "/chat/completions",
 		Headers: headers,
 		Body:    body,
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to send request: %v. Please check your network connection and try again.", err)
+		return "", fmt.Errorf("failed to send request: %w", err)
 	}
 
 	if res.StatusCode != 200 {
-		return "", fmt.Errorf("failed to fetch completion response (%d): %s. Please try again.", res.StatusCode, res.Status)
+		return "", fmt.Errorf("failed to fetch completion response (%d): %s", res.StatusCode, res.Status)
 	}
 
 	resBody, err := res.StringDecode()
 	if err != nil {
-		return "", fmt.Errorf("failed to decode response: %v. Please try again.", err)
+		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	if !stream {
@@ -306,16 +322,16 @@ func (c *copilot) Ask(ctx context.Context, prompt string, opts any) (string, err
 
 	c.histories = append(c.histories, PromptMessage{
 		Content: prompt,
-		Role:    "user",
+		Role:    userRole,
 	})
 
 	c.histories = append(c.histories, PromptMessage{
 		Content: fullResponse,
-		Role:    "assistant",
+		Role:    assistantRole,
 	})
 
 	if fullResponse == "" {
-		return "", fmt.Errorf("failed to get response. Please try again.")
+		return "", fmt.Errorf("failed to get response")
 	}
 
 	return strings.TrimSpace(fullResponse), nil
@@ -329,20 +345,20 @@ func (c *copilot) FetchAgents(ctx context.Context) (map[string]*Agent, error) {
 
 	headers, err := c.generateHeaders(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate headers: %v. Please try again.", err)
+		return nil, fmt.Errorf("failed to generate headers: %w", err)
 	}
 
 	res, err := utils.HttpRequest(ctx, utils.HttpOptions{
 		Method:  http.MethodGet,
-		Url:     "https://api.githubcopilot.com/agents",
+		Url:     apiURL + "/agents",
 		Headers: headers,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to send request: %v. Please check your network connection and try again.", err)
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
 	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("failed to fetch agents (%d): %s. Please try again.", res.StatusCode, res.Status)
+		return nil, fmt.Errorf("failed to fetch agents (%d): %s", res.StatusCode, res.Status)
 	}
 
 	var restResponse struct {
@@ -351,7 +367,7 @@ func (c *copilot) FetchAgents(ctx context.Context) (map[string]*Agent, error) {
 
 	err = res.JsonDecode(&restResponse)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode response: %v. Please try again.", err)
+		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	for _, a := range restResponse.Agents {
@@ -367,7 +383,7 @@ func (c *copilot) FetchAgents(ctx context.Context) (map[string]*Agent, error) {
 
 	err = utils.SaveFile(utils.GetConfigPath()+"/lazycopilot/agents.json", c.agents)
 	if err != nil {
-		return nil, fmt.Errorf("failed to save agents to file: %v. Please check your file permissions and try again.", err)
+		return nil, fmt.Errorf("failed to save agents to file: %w", err)
 	}
 
 	return c.agents, nil
@@ -381,21 +397,21 @@ func (c *copilot) FetchModels(ctx context.Context) (map[string]*Model, error) {
 
 	headers, err := c.generateHeaders(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate headers: %v. Please try again.", err)
+		return nil, fmt.Errorf("failed to generate headers: %w", err)
 	}
 
 	res, err := utils.HttpRequest(ctx, utils.HttpOptions{
 		Method:  http.MethodGet,
-		Url:     "https://api.githubcopilot.com/models",
+		Url:     apiURL + "/models",
 		Headers: headers,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to send request: %v. Please check your network connection and try again.", err)
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("failed to fetch models (%d): %s. Please try again.", res.StatusCode, res.Status)
+		return nil, fmt.Errorf("failed to fetch models (%d): %s", res.StatusCode, res.Status)
 	}
 
 	var results struct {
@@ -403,7 +419,7 @@ func (c *copilot) FetchModels(ctx context.Context) (map[string]*Model, error) {
 	}
 	err = res.JsonDecode(&results)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode response: %v. Please try again.", err)
+		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	for _, model := range results.Data {
@@ -414,7 +430,7 @@ func (c *copilot) FetchModels(ctx context.Context) (map[string]*Model, error) {
 
 	err = utils.SaveFile(utils.GetConfigPath()+"/lazycopilot/models.json", c.models)
 	if err != nil {
-		return nil, fmt.Errorf("failed to save models to file: %v. Please check your file permissions and try again.", err)
+		return nil, fmt.Errorf("failed to save models to file: %w", err)
 	}
 
 	return c.models, nil
@@ -422,7 +438,7 @@ func (c *copilot) FetchModels(ctx context.Context) (map[string]*Model, error) {
 
 func (c *copilot) authenticate(ctx context.Context) error {
 	if c.githubToken == nil || *c.githubToken == "" {
-		return fmt.Errorf("GitHub token not set. Please authenticate using 'auth login' command.")
+		return fmt.Errorf("GitHub token not set. Please authenticate using 'lazycopilot auth login' command")
 	}
 
 	if c.token == nil || (c.token.ExpiresAt != 0 && c.token.ExpiresAt <= int(time.Now().Unix())) {
@@ -431,27 +447,30 @@ func (c *copilot) authenticate(ctx context.Context) error {
 			Method: http.MethodGet,
 			Url:    "https://api.github.com/copilot_internal/v2/token",
 			Headers: &utils.Headers{
-				"Authorization": "Bearer " + *c.githubToken,
-				"Accept":        "application/json",
+				authorizationHeader: "Bearer " + *c.githubToken,
+				acceptHeader:        applicationJSON,
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("failed to request token: %v. Please check your network connection and try again.", err)
+			return fmt.Errorf("failed to request token: %w", err)
 		}
 		if res.StatusCode != 200 {
-			return fmt.Errorf("failed to authenticate (%d): %s. Please try again.", res.StatusCode, res.Status)
+			if res.StatusCode == 403 {
+				return fmt.Errorf("failed to authenticate: invalid token. Please check if your GitHub account has Copilot active at https://github.com/settings/copilot")
+			}
+			return fmt.Errorf("failed to authenticate (%d): %s", res.StatusCode, res.Status)
 		}
 		var token GithubToken
 		err = res.JsonDecode(&token)
 		if err != nil {
-			return fmt.Errorf("failed to decode token response: %v. Please try again.", err)
+			return fmt.Errorf("failed to decode token response: %w", err)
 		}
 		c.sessionId = sessionId
 		c.token = &token
 
 		err = utils.SaveFile(utils.GetConfigPath()+"/lazycopilot/token.json", c.token)
 		if err != nil {
-			return fmt.Errorf("failed to save token to file: %v. Please check your file permissions and try again.", err)
+			return fmt.Errorf("failed to save token to file: %w", err)
 		}
 	}
 
@@ -468,14 +487,14 @@ func (c *copilot) generateHeaders(ctx context.Context) (*utils.Headers, error) {
 		return nil, err
 	}
 	headers := &utils.Headers{
-		"authorization":          "Bearer " + c.token.Token,
+		authorizationHeader:      "Bearer " + c.token.Token,
 		"x-request-id":           uuid.New().String(),
 		"vscode-sessionid":       c.sessionId,
 		"vscode-machineid":       c.machineId,
-		"copilot-integration-id": "vscode-chat",
-		"openai-organization":    "github-copilot",
-		"openai-intent":          "conversation-panel",
-		"content-type":           "application/json",
+		"copilot-integration-id": copilotIntegrationID,
+		"openai-organization":    openaiOrganization,
+		"openai-intent":          openaiIntent,
+		contentTypeHeader:        applicationJSON,
 	}
 	return headers, nil
 }
