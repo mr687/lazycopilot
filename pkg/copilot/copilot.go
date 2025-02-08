@@ -318,7 +318,7 @@ func (c *copilot) Ask(ctx context.Context, prompt string, opts any) (string, err
 		return "", fmt.Errorf("failed to get response. Please try again.")
 	}
 
-	return fullResponse, nil
+	return strings.TrimSpace(fullResponse), nil
 }
 
 // FetchAgents implements Copilot.

@@ -96,8 +96,17 @@ func connectGithubDeviceFlow() (string, error) {
 		return "", fmt.Errorf("failed to request device code: %v. Check your internet connection and try again.", err)
 	}
 
-	fmt.Println("Code: ", code.UserCode)
-	fmt.Println("Navigate to the URL and paste the code: ", code.VerificationURI)
+	fmt.Println()
+	fmt.Println(" [Copilot] ")
+	fmt.Println()
+	fmt.Println(" First copy your one-time code: ")
+	fmt.Printf("   %s\n", code.UserCode)
+	fmt.Println(" In your browser, visit: ")
+	fmt.Printf("   %s\n", code.VerificationURI)
+	fmt.Println()
+	fmt.Println(" ...waiting, it might take a while and ")
+	fmt.Println(" this will auto close once done... ")
+	fmt.Println()
 
 	accessToken, err := device.Wait(
 		context.TODO(),

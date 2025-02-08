@@ -45,17 +45,22 @@ func commitRunner(cmd *cobra.Command, args []string) {
 		fmt.Printf("Error: The specified path '%s' is not valid or does not exist.\n", path)
 		os.Exit(1)
 	}
-	diff := utils.GetDiff(path, true)
+
+	var diff string
+
+	stage, _ := cmd.Flags().GetBool("stage")
+	if stage {
+		utils.StageChanges(path)
+		diff = utils.GetDiff(path, true)
+		if diff == "" {
+			fmt.Println("Error: No changes detected to commit after staging. Please make sure you have changes to commit.")
+			os.Exit(1)
+		}
+	}
+
 	if diff == "" {
-		stage, _ := cmd.Flags().GetBool("stage")
-		if stage {
-			utils.StageChanges(path)
-			diff = utils.GetDiff(path, true)
-			if diff == "" {
-				fmt.Println("Error: No changes detected to commit after staging. Please make sure you have changes to commit.")
-				os.Exit(1)
-			}
-		} else {
+		diff = utils.GetDiff(path, true)
+		if diff == "" {
 			fmt.Println("Error: No staged changes detected. Use the --stage flag to stage all changes before committing.")
 			os.Exit(1)
 		}
@@ -77,12 +82,20 @@ func commitRunner(cmd *cobra.Command, args []string) {
 	case "trolling":
 		commitPrompt += "\n\nMake the commit title trolling and sarcastic."
 	}
+
 	copilot := copilot.NewCopilot()
 	content, err := copilot.Ask(ctx, commitPrompt, nil)
 	if err != nil {
 		fmt.Printf("Error: Failed to generate commit message. Details: %v\n", err)
 		os.Exit(1)
 	}
+
+	// Remove code block wrappers from the generated content
+	content = strings.TrimPrefix(content, "```")
+	content = strings.TrimSuffix(content, "```")
+
+	// Remove extra newlines from the generated content
+	content = strings.Trim(content, "\n")
 
 	noCommit, _ := cmd.Flags().GetBool("no-commit")
 	if !noCommit {
@@ -120,5 +133,7 @@ func commitRunner(cmd *cobra.Command, args []string) {
 			fmt.Printf("Error: Failed to commit changes. Details: %v\n", err)
 			os.Exit(1)
 		}
+	} else {
+		fmt.Println(content)
 	}
 }
