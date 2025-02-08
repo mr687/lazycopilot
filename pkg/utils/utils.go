@@ -84,7 +84,7 @@ func SetCurrentOSName() string {
 	os := runtime.GOOS
 	switch os {
 	case "darwin":
-		os = "MacOS"
+		os = "Darwin"
 	case "linux":
 		os = "Linux"
 	case "windows":
