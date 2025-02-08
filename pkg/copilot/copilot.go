@@ -370,7 +370,7 @@ func (c *copilot) FetchAgents(ctx context.Context) (map[string]*Agent, error) {
 		Description: "Default noop agent",
 	}
 
-	_ = utils.SaveFile("agents.json", c.agents)
+	_ = utils.SaveFile(utils.GetConfigPath()+"/lazycopilot/agents.json", c.agents)
 
 	return c.agents, nil
 }
@@ -416,7 +416,7 @@ func (c *copilot) FetchModels(ctx context.Context) (map[string]*Model, error) {
 		}
 	}
 
-	_ = utils.SaveFile("models.json", c.models)
+	_ = utils.SaveFile(utils.GetConfigPath()+"/lazycopilot/models.json", c.models)
 
 	return c.models, nil
 }
@@ -450,7 +450,7 @@ func (c *copilot) authenticate(ctx context.Context) error {
 		c.sessionId = sessionId
 		c.token = &token
 
-		err = utils.SaveFile("token.json", c.token)
+		err = utils.SaveFile(utils.GetConfigPath()+"/lazycopilot/token.json", c.token)
 		if err != nil {
 			return err
 		}
