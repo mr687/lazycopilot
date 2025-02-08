@@ -11,6 +11,8 @@ LazyCopilot is a versatile AI-powered tool designed to assist developers with va
 
 ## Installation
 
+### From Source
+
 1. Clone the repository:
     ```sh
     git clone https://github.com/mr687/lazycopilot.git
@@ -21,13 +23,49 @@ LazyCopilot is a versatile AI-powered tool designed to assist developers with va
     ```sh
     make build
     ```
+3. Run
+    ```sh
+    ./bin/lazycopilot
+    ```
+
+### Using Homebrew
+
+1. Add the tap:
+    ```sh
+    brew tap mr687/lazycopilot
+    ```
+
+2. Install LazyCopilot:
+    ```sh
+    brew install lazycopilot
+    ```
+
+### Using Scoop (Windows)
+
+1. Add the bucket:
+    ```sh
+    scoop bucket add lazycopilot https://github.com/mr687/scoop-lazycopilot
+    ```
+
+2. Install LazyCopilot:
+    ```sh
+    scoop install lazycopilot
+    ```
+
+### Binary Release
+
+Binary releases are available for macOS, Linux, and Windows architectures.
+
+1. Download the binary release file from the [releases page](https://github.com/mr687/lazycopilot/releases).
+2. Extract the downloaded file.
+3. Move the binary to a directory included in your system's PATH.
 
 ## Usage
 
 To use LazyCopilot, run the following command in your terminal:
 
 ```sh
-bin/lazycopilot --path /path/to/your/git/repository
+lazycopilot
 ```
 
 ### Commands
@@ -37,23 +75,26 @@ bin/lazycopilot --path /path/to/your/git/repository
 Generate a commit message using AI.
 
 ```sh
-bin/lazycopilot commit --path /path/to/your/git/repository
+lazycopilot commit
 ```
 
 Options:
-- `--stage`: Stage changes if no staged changes are detected.
-- `--title-only`: Generate only the commit title.
-- `--style`: Style of the commit title: `normal`, `funny`, `wise`, `trolling`.
-- `--no-commit`: Do not commit the generated content immediately.
+- `--stage`: Automatically stage changes if no staged changes are detected.
+- `--title-only`: Generate only the commit title without the body.
+- `--style`: Specify the style of the commit title. Available options are `normal`, `funny`, `wise`, and `trolling`.
+- `--no-commit`: Generate the commit message without committing the changes immediately.
 
 #### `auth`
 
-Authenticate with GitHub.
+Authenticate with GitHub to enable Copilot's capabilities.
 
 ```sh
-bin/lazycopilot auth login
-bin/lazycopilot auth logout
+lazycopilot auth login
+lazycopilot auth logout
 ```
+
+- `login`: Log in to your GitHub account.
+- `logout`: Log out from your GitHub account.
 
 ## Future Plans
 
