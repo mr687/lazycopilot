@@ -32,20 +32,28 @@ bin/lazycopilot --path /path/to/your/git/repository
 
 ### Commands
 
-- **commit**: Generate a commit message using AI.
-    ```sh
-    bin/lazycopilot commit --path /path/to/your/git/repository
-    ```
-    - `--stage`: Stage changes if no staged changes are detected.
-    - `--title-only`: Generate only the commit title.
-    - `--style`: Style of the commit title: normal, funny, wise, trolling.
-    - `--no-commit`: Do not commit the generated content immediately.
+#### `commit`
 
-- **auth**: Authenticate with GitHub.
-    ```sh
-    bin/lazycopilot auth login
-    bin/lazycopilot auth logout
-    ```
+Generate a commit message using AI.
+
+```sh
+bin/lazycopilot commit --path /path/to/your/git/repository
+```
+
+Options:
+- `--stage`: Stage changes if no staged changes are detected.
+- `--title-only`: Generate only the commit title.
+- `--style`: Style of the commit title: `normal`, `funny`, `wise`, `trolling`.
+- `--no-commit`: Do not commit the generated content immediately.
+
+#### `auth`
+
+Authenticate with GitHub.
+
+```sh
+bin/lazycopilot auth login
+bin/lazycopilot auth logout
+```
 
 ## Future Plans
 
