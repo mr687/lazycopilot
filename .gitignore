@@ -40,8 +40,8 @@ vendor/
 # Go workspace file
 go.work
 
-# Ignore cached json files
-*.json
-
 # Ignore binary files
 bin
+
+# Added by goreleaser init:
+dist/
