@@ -2,6 +2,11 @@
 
 LazyCopilot is a versatile AI-powered tool designed to assist developers with various tasks, starting with generating better commit messages. It leverages the capabilities of GitHub Copilot to provide intelligent suggestions based on your code changes.
 
+[![GitHub Releases](https://img.shields.io/github/downloads/mr687/lazycopilot/total)](https://github.com/mr687/lazycopilot/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mr687/lazycopilot)](https://goreportcard.com/report/github.com/mr687/lazycopilot)
+[![GitHub tag](https://img.shields.io/github/tag/mr687/lazycopilot.svg)](https://github.com/mr687/lazycopilot/releases/latest)
+[![homebrew](https://img.shields.io/homebrew/v/lazycopilot)](https://github.com/Homebrew/homebrew-core/blob/master/Formula/lazycopilot.rb)
+
 ## Features
 
 - **Commit Message Generation**: Generates commit messages following the commitizen convention.
