@@ -9,10 +9,24 @@ LazyCopilot is a versatile AI-powered tool designed to assist developers with va
 
 ## Features
 
-- **Commit Message Generation**: Generates commit messages following the commitizen convention.
-- **Authentication**: Seamlessly authenticate with GitHub to access Copilot's capabilities.
-- **Versatile Commit Styles**: Choose from different commit title styles such as normal, funny, wise, and trolling.
-- **Future Potential**: Plans to expand into other areas of development assistance, making it an indispensable AI tool for developers.
+- **Smart Commit Message Generation**: 
+  - Automatically generates commit messages following conventional formats
+  - Supports multiple commit message styles (normal, funny, wise, trolling)
+  - Option to generate title-only commits
+  - Preview generated messages without committing
+- **Flexible Git Integration**:
+  - Works with staged changes
+  - Optional automatic staging of unstaged changes
+  - Custom repository path support
+- **Style Management**:
+  - List available commit message styles
+  - Add custom commit message styles
+  - Remove existing styles
+  - Sync styles with defaults
+- **GitHub Authentication**:
+  - Secure device flow authentication
+  - Easy login/logout management
+  - Token persistence
 
 ## Installation
 
@@ -77,29 +91,40 @@ lazycopilot
 
 #### `commit`
 
-Generate a commit message using AI.
+Generate and manage commit messages using AI.
 
 ```sh
-lazycopilot commit
+# Generate commit message
+lazycopilot commit gen [flags]
+
+# List available styles
+lazycopilot commit styles
+
+# Add custom style
+lazycopilot commit style-add <name> <description> <prompt>
+
+# Remove a style
+lazycopilot commit style-remove <name>
+
+# Sync styles with defaults
+lazycopilot commit style-sync
 ```
 
-Options:
-- `--stage`: Automatically stage changes if no staged changes are detected.
-- `--title-only`: Generate only the commit title without the body.
-- `--style`: Specify the style of the commit title. Available options are `normal`, `funny`, `wise`, and `trolling`.
-- `--no-commit`: Generate the commit message without committing the changes immediately.
+Commit Generation Flags:
+- `--path, -p`: Specify repository path (default: current directory)
+- `--stage, -s`: Stage all changes if no staged changes detected
+- `--title-only, -t`: Generate only the commit title
+- `--style, -S`: Specify commit style (normal, funny, wise, trolling)
+- `--no-commit, -n`: Preview message without committing
 
 #### `auth`
 
-Authenticate with GitHub to enable Copilot's capabilities.
+Manage GitHub authentication for Copilot access.
 
 ```sh
-lazycopilot auth login
-lazycopilot auth logout
+lazycopilot auth login   # Authenticate with GitHub
+lazycopilot auth logout  # Remove local authentication
 ```
-
-- `login`: Log in to your GitHub account.
-- `logout`: Log out from your GitHub account.
 
 ## Future Plans
 
