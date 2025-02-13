@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/mr687/lazycopilot/compare/v1.0.0...v1.1.0) (2025-02-13)
+
+
+### Features
+
+* **cli:** enhance commit command with style management ([35d1232](https://github.com/mr687/lazycopilot/commit/35d1232f8267d042479f663151e9d2b91c7bfc29))
+
 # 1.0.0 (2025-02-08)
 
 
